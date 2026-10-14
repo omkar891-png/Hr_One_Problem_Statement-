@@ -26,26 +26,26 @@ This repository represents a full, battle-tested implementation of the **HROne E
 
 ```mermaid
 flowchart TD
-    Client([HTTP Client / Frontend]) -->|JSON / REST| FastAPI[FastAPI Service - app/main.py]
+    Client["HTTP Client / Frontend"] -->|REST API| FastAPI["FastAPI Service - app/main.py"]
     
-    subgraph "Core Business Logic"
+    subgraph Core["Core Business Logic"]
         FastAPI --> Auth["Pydantic Schemas & Validators"]
-        FastAPI --> BizRules["Business Rules (R1 - R10)"]
-        BizRules --> R1["R1: IST & Truncated Epoch ms"]
-        BizRules --> R2["R2: Strict Late Evaluation (>10m)"]
+        FastAPI --> BizRules["Business Rules R1 - R10"]
+        BizRules --> R1["R1: IST and Truncated Epoch ms"]
+        BizRules --> R2["R2: Strict Late Evaluation >10m"]
         BizRules --> R3R5["R3-R5: Overtime, Half-Up Hours, Half-Day"]
         BizRules --> R7R9["R7-R9: Working Days & Period Headcount"]
     end
 
-    subgraph "MongoDB Database (attendance_db)"
-        BizRules -->|Find / Atomic Update| Employees[(employees)]
-        BizRules -->|Unique Natural Key (emp_code, date)| Attendance[(attendance_logs)]
+    subgraph Database["MongoDB Database - attendance_db"]
+        BizRules -->|Find and Atomic Update| Employees[("employees collection")]
+        BizRules -->|Unique Key: emp_code + date| Attendance[("attendance_logs collection")]
         
         FastAPI -->|Aggregation Pipelines| Aggs["Pure MongoDB Aggregations"]
-        Aggs --> Pipe1["Employee Monthly ($group)"]
-        Aggs --> Pipe2["Department Summary ($lookup + $reduce)"]
-        Aggs --> Pipe3["Leaderboard ($setWindowFields + $rank)"]
-        Aggs --> Pipe4["Trend ($densify + 7d Moving Avg)"]
+        Aggs --> Pipe1["Employee Monthly Aggregation"]
+        Aggs --> Pipe2["Department Summary Aggregation"]
+        Aggs --> Pipe3["Leaderboard Aggregation with Rank"]
+        Aggs --> Pipe4["Trend Aggregation with Densify"]
     end
 ```
 
